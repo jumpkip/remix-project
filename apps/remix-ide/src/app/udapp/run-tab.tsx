@@ -148,6 +148,7 @@ export class RunTab extends ViewPlugin {
       'vm-paris': 'Deploy to the in-browser virtual machine running the Paris fork.',
       'vm-london': 'Deploy to the in-browser virtual machine running the London fork.',
       'vm-berlin': 'Deploy to the in-browser virtual machine running the Berlin fork.',
+      'vm-prague': 'Deploy to the in-browser virtual machine running the Prague fork.',
       'vm-mainnet-fork': 'Deploy to a fork of the Ethereum mainnet latest block in the in-browser virtual machine.',
       'vm-sepolia-fork': 'Deploy to a fork of the Sepolia testnet latest block in the in-browser virtual machine.',
       'vm-custom-fork': 'Deploy to a fork of a custom network in the in-browser virtual machine.',
@@ -161,6 +162,7 @@ export class RunTab extends ViewPlugin {
       'injected-Brave': 'Deploy through the Brave browser extension.',
       'injected-metamask-optimism': 'Deploy to Optimism through the Metamask browser extension.',
       'injected-metamask-gnosis': 'Deploy to Gnosis through the Metamask browser extension.',
+      'injected-metamask-chiado': 'Deploy to Gnosis Chiado Testnet through the Metamask browser extension.',
       'injected-metamask-arbitrum': 'Deploy to Arbitrum through the Metamask browser extension.',
       'injected-metamask-sepolia': 'Deploy to the Sepolia testnet through the Metamask browser extension.',
       'injected-metamask-ephemery': 'Deploy to the Ephemery testnet through the Metamask browser extension.',
@@ -171,6 +173,7 @@ export class RunTab extends ViewPlugin {
       'injected-metamask-optimism': ['assets/img/optimism-ethereum-op-logo.png', 'assets/img/metamask.png'],
       'injected-metamask-arbitrum': ['assets/img/arbitrum-arb-logo.png', 'assets/img/metamask.png'],
       'injected-metamask-gnosis': ['assets/img/gnosis_chain.png', 'assets/img/metamask.png'],
+      'injected-metamask-chiado': ['assets/img/gnosis_chain.png', 'assets/img/metamask.png'],
       'injected-metamask-linea': ['assets/img/linea_chain.png', 'assets/img/metamask.png'],
       'injected-metamask-sepolia': ['assets/img/metamask.png'],
       'injected-metamask-ephemery': ['assets/img/metamask.png'],
@@ -233,7 +236,13 @@ export class RunTab extends ViewPlugin {
             "symbol": "ETH",
             "decimals": 18
           })
-        await addCustomInjectedProvider(10, event, 'injected-metamask-gnosis', 'Gnosis Mainnet', '', ['https://rpc.ankr.com/gnosis', 'https://1rpc.io/gnosis'],
+        await addCustomInjectedProvider(10, event, 'injected-metamask-gnosis', 'Gnosis Mainnet', '', ['https://gnosis.drpc.org'],
+          {
+            "name": "XDAI",
+            "symbol": "XDAI",
+            "decimals": 18
+          })
+        await addCustomInjectedProvider(11, event, 'injected-metamask-chiado', 'Gnosis Chiado Testnet', '', ['https://gnosis-chiado.drpc.org'],
           {
             "name": "XDAI",
             "symbol": "XDAI",
@@ -247,20 +256,21 @@ export class RunTab extends ViewPlugin {
             "decimals": 18
           })
         */
-        await addCustomInjectedProvider(11, event, 'injected-metamask-linea', 'L2 - Linea', '0xe708', ['https://rpc.linea.build'])
+        await addCustomInjectedProvider(12, event, 'injected-metamask-linea', 'L2 - Linea', '0xe708', ['https://rpc.linea.build'])
       }
     }
 
     // VM
     const titleVM = 'Execution environment is local to Remix.  Data is only saved to browser memory and will vanish upon reload.'
-    await addProvider(1, 'vm-cancun', 'Remix VM (Cancun)', { isInjected: false, isVM: true, isRpcForkedState: false, statePath: '.states/vm-cancun/state.json', fork: 'cancun' }, 'settingsVMCancunMode', titleVM)
+    await addProvider(1, 'vm-prague', 'Remix VM (Prague)', { isInjected: false, isVM: true, isRpcForkedState: false, statePath: '.states/vm-prague/state.json', fork: 'prague' }, 'settingsVMPectraMode', titleVM)
+    await addProvider(2, 'vm-cancun', 'Remix VM (Cancun)', { isInjected: false, isVM: true, isRpcForkedState: false, statePath: '.states/vm-cancun/state.json', fork: 'cancun' }, 'settingsVMCancunMode', titleVM)
     await addProvider(50, 'vm-shanghai', 'Remix VM (Shanghai)', { isInjected: false, isVM: true, isRpcForkedState: false, statePath: '.states/vm-shanghai/state.json', fork: 'shanghai' }, 'settingsVMShanghaiMode', titleVM)
     await addProvider(51, 'vm-paris', 'Remix VM (Paris)', { isInjected: false, isVM: true, isRpcForkedState: false, statePath: '.states/vm-paris/state.json', fork: 'paris' }, 'settingsVMParisMode', titleVM)
     await addProvider(52, 'vm-london', 'Remix VM (London)', { isInjected: false, isVM: true, isRpcForkedState: false, statePath: '.states/vm-london/state.json', fork: 'london' }, 'settingsVMLondonMode', titleVM)
     await addProvider(53, 'vm-berlin', 'Remix VM (Berlin)', { isInjected: false, isVM: true, isRpcForkedState: false, statePath: '.states/vm-berlin/state.json', fork: 'berlin' }, 'settingsVMBerlinMode', titleVM)
-    await addProvider(2, 'vm-mainnet-fork', 'Remix VM - Mainnet fork', { isInjected: false, isVM: true, isVMStateForked: true, isRpcForkedState: true, fork: 'cancun' }, 'settingsVMMainnetMode', titleVM)
-    await addProvider(3, 'vm-sepolia-fork', 'Remix VM - Sepolia fork', { isInjected: false, isVM: true, isVMStateForked: true, isRpcForkedState: true, fork: 'cancun' }, 'settingsVMSepoliaMode', titleVM)
-    await addProvider(4, 'vm-custom-fork', 'Remix VM - Custom fork', { isInjected: false, isVM: true, isVMStateForked: true, isRpcForkedState: true, fork: '' }, 'settingsVMCustomMode', titleVM)
+    await addProvider(3, 'vm-mainnet-fork', 'Remix VM - Mainnet fork', { isInjected: false, isVM: true, isVMStateForked: true, isRpcForkedState: true, fork: 'prague' }, 'settingsVMMainnetMode', titleVM)
+    await addProvider(4, 'vm-sepolia-fork', 'Remix VM - Sepolia fork', { isInjected: false, isVM: true, isVMStateForked: true, isRpcForkedState: true, fork: 'prague' }, 'settingsVMSepoliaMode', titleVM)
+    await addProvider(5, 'vm-custom-fork', 'Remix VM - Custom fork', { isInjected: false, isVM: true, isVMStateForked: true, isRpcForkedState: true, fork: '' }, 'settingsVMCustomMode', titleVM)
 
     // Forked VM States
     const addFVSProvider = async(stateFilePath, pos) => {
