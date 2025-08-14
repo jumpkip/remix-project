@@ -100,6 +100,7 @@ module.exports = {
       .click('li[data-id="treeViewLitreeViewItemREADME.txt"')
       .addFile('Untitled9.sol', sources[8]['Untitled9.sol'])
       // avoid invalid source issues
+      .expandAllFolders()
       .isVisible({
         selector: '*[data-id="treeViewLitreeViewItem.deps/npm/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol"]',
         timeout: 120000,
@@ -108,6 +109,7 @@ module.exports = {
       .clickLaunchIcon('solidity')
       .click('[data-id="compilerContainerCompileBtn"]')
       .clickLaunchIcon('filePanel')
+      .expandAllFolders()
       .isVisible({
         selector: '*[data-id="treeViewLitreeViewItem.deps/npm/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol"]',
         timeout: 120000,
@@ -126,7 +128,8 @@ module.exports = {
       .clickLaunchIcon('filePanel')
       .click('li[data-id="treeViewLitreeViewItemREADME.txt"')
       .addFile('package.json', sources[9]['package.json'])
-      .addFile('Untitled10.sol', sources[9]['Untitled10.sol'])      
+      .addFile('Untitled10.sol', sources[9]['Untitled10.sol'])
+      .expandAllFolders()
       // avoid invalid source issues
       .isVisible({
         selector: '*[data-id="treeViewLitreeViewItem.deps/npm/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol"]',
@@ -136,6 +139,7 @@ module.exports = {
       .clickLaunchIcon('solidity')
       .click('[data-id="compilerContainerCompileBtn"]')
       .clickLaunchIcon('filePanel')
+      .expandAllFolders()
       .isVisible({
         selector: '*[data-id="treeViewLitreeViewItem.deps/npm/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol"]',
         timeout: 120000,
@@ -147,15 +151,15 @@ module.exports = {
     browser
       // clone https://github.com/yann300/remix-reward
       .clickLaunchIcon('filePanel')
-      .waitForElementVisible('[data-id="workspaceMenuDropdown"]')
-      .click('[data-id="workspaceMenuDropdown"]')
-      .waitForElementVisible('[data-id="workspaceclone"]')
-      .click('[data-id="workspaceclone"]')
-      .waitForElementVisible('[data-id="fileSystemModalDialogModalBody-react"]')
-      .click('[data-id="fileSystemModalDialogModalBody-react"]')
+      .waitForElementVisible('[data-id="github-dropdown-toggle"]')
+      .click('[data-id="github-dropdown-toggle"]')
+      .waitForElementVisible('[data-id="github-dropdown-item-clone"]')
+      .click('[data-id="github-dropdown-item-clone"]')
+      .waitForElementVisible('[data-id="topbarModalModalDialogModalBody-react"]')
+      .click('[data-id="topbarModalModalDialogModalBody-react"]')
       .waitForElementVisible('[data-id="modalDialogCustomPromptTextClone"]')
       .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/remix-project-org/remix-reward')
-      .click('[data-id="fileSystem-modal-footer-ok-react"]')
+      .click('[data-id="topbarModal-modal-footer-ok-react"]')
       .waitForElementPresent('.fa-spinner')
       .waitForElementNotPresent('.fa-spinner', 120000)
       .waitForElementVisible('*[data-id="treeViewLitreeViewItem.git"]')

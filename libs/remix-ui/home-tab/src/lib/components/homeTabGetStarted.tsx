@@ -151,7 +151,7 @@ function HomeTabGetStarted({ plugin }: HomeTabGetStartedProps) {
   }
 
   return (
-    <div className="pl-2" id="hTGetStartedSection">
+    <div className="ps-2" id="hTGetStartedSection">
       <label className="pt-3" style={{ fontSize: '1.2rem' }}>
         <FormattedMessage id="home.projectTemplates" />
       </label>
@@ -164,17 +164,17 @@ function HomeTabGetStarted({ plugin }: HomeTabGetStartedProps) {
                   tooltipText={template.description}
                   tooltipId={template.gsID}
                   tooltipClasses="text-nowrap"
-                  tooltipTextClasses="border bg-light text-dark p-1 pr-3"
+                  tooltipTextClasses="border bg-light text-dark p-1 pe-3"
                   placement="top-start"
                   key={`${template.gsID}-${template.workspaceTitle}-${index}`}
                 >
                   <button
                     key={index}
                     className={index === 0 ?
-                      'btn btn-primary border p-2 text-nowrap mr-3 mb-3' :
+                      'btn btn-primary border p-2 text-nowrap me-3 mb-3' :
                       index === workspaceTemplates.length - 1 ?
-                        'btn border p-2 text-nowrap mr-2 mb-3' :
-                        'btn border p-2 text-nowrap mr-3 mb-3'
+                        'btn border p-2 text-nowrap me-2 mb-3' :
+                        'btn border p-2 text-nowrap me-3 mb-3'
                     }
                     onClick={async (e) => {
                       createWorkspace(template.templateName)

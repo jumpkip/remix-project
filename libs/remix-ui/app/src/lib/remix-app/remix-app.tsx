@@ -249,6 +249,9 @@ const RemixApp = (props: IRemixAppUi) => {
             {showEnterDialog && <EnterDialog handleUserChoice={(type) => handleUserChosenType(type)}></EnterDialog>}
             {showManagePreferencesDialog && <ManagePreferencesDialog savePreferencesFn={() => setShowEnterDialog(true)}></ManagePreferencesDialog>}
             <div className='d-flex flex-column'>
+              <div className='top-bar'>
+                {props.app.topBar.render()}
+              </div>
               <div className={`remixIDE ${appReady ? '' : 'd-none'}`} data-id="remixIDE">
                 <div id="icon-panel" data-id="remixIdeIconPanel" className="custom_icon_panel iconpanel bg-light">
                   {props.app.menuicons.render()}
@@ -257,7 +260,7 @@ const RemixApp = (props: IRemixAppUi) => {
                   ref={sidePanelRef}
                   id="side-panel"
                   data-id="remixIdeSidePanel"
-                  className={`sidepanel border-right border-left ${hideSidePanel ? 'd-none' : ''}`}
+                  className={`sidepanel border-end border-start ${hideSidePanel ? 'd-none' : ''}`}
                 >
                   {props.app.sidePanel.render()}
                 </div>
@@ -274,7 +277,7 @@ const RemixApp = (props: IRemixAppUi) => {
                 <div id="main-panel" data-id="remixIdeMainPanel" className="mainpanel d-flex">
                   <RemixUIMainPanel layout={props.app.layout}></RemixUIMainPanel>
                 </div>
-                <div id="pinned-panel" ref={pinnedPanelRef} data-id="remixIdePinnedPanel" className={`flex-row-reverse pinnedpanel border-right border-left ${hidePinnedPanel ? 'd-none' : 'd-flex'}`}>
+                <div id="pinned-panel" ref={pinnedPanelRef} data-id="remixIdePinnedPanel" className={`flex-row-reverse pinnedpanel border-end border-start ${hidePinnedPanel ? 'd-none' : 'd-flex'}`}>
                   {props.app.pinnedPanel.render()}
                 </div>
                 {

@@ -27,11 +27,11 @@ export function LanguageOptions({ plugin }: { plugin: any }) {
   return (
     <>
       <div className="d-flex justify-content-between w-100 align-items-center pt-4">
-        <label style={{ fontSize: '1.2rem' }} className="ml-2 pb-0 mb-0">
+        <label style={{ fontSize: '1.2rem' }} className="ms-2 pb-0 mb-0">
           <FormattedMessage id="home.featured" />
         </label>
         <Dropdown>
-          <Dropdown.Toggle title={langOptions} id="languagedropdown" size="sm" style={{ backgroundColor: 'var(--secondary)', color: 'var(--text)' }}>
+          <Dropdown.Toggle title={langOptions} id="languagedropdown" size="sm" style={{ backgroundColor: 'var(--bs-secondary)', color: 'var(--text)' }}>
             {langOptions}
           </Dropdown.Toggle>
           <Dropdown.Menu className="dropdown-menu langSelector" style={{ paddingTop: "0px", paddingBottom: "0px", minWidth: 'fit-content', backgroundColor: 'var(--body-bg)' }}>

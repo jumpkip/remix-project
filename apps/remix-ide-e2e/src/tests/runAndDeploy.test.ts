@@ -112,7 +112,8 @@ module.exports = {
 
   'Should ensure that save environment state is checked by default #group4 #group5': function (browser: NightwatchBrowser) {
     browser.waitForElementPresent('*[data-id="remixIdeSidePanel"]')
-      .clickLaunchIcon('settings')
+      .waitForElementVisible('*[data-id="topbar-settingsIcon"]')
+      .click('*[data-id="topbar-settingsIcon"]')
       .waitForElementPresent('[data-id="settingsEnableSaveEnvStateLabel"]')
       .scrollInto('[data-id="settingsEnableSaveEnvStateLabel"]')
       .verify.elementPresent('[data-id="settingsEnableSaveEnvState"]:checked')
@@ -153,7 +154,8 @@ module.exports = {
 
   'Should save state after running web3 script #group4': function (browser: NightwatchBrowser) {
     browser
-      .clickLaunchIcon('settings')
+      .waitForElementVisible('*[data-id="topbar-settingsIcon"]')
+      .click('*[data-id="topbar-settingsIcon"]')
       .waitForElementPresent('[data-id="settingsTabGenerateContractMetadataLabel"]')
       .click('[data-id="settingsTabGenerateContractMetadataLabel"]')
       .verify.elementPresent('[data-id="settingsTabGenerateContractMetadata"]:checked')
@@ -168,7 +170,7 @@ module.exports = {
       .click('*[data-id="treeViewLitreeViewItemscripts"]')
       .waitForElementVisible('*[data-id="treeViewLitreeViewItemscripts/deploy_with_web3.ts"]')
       .openFile('scripts/deploy_with_web3.ts')
-      .click('[data-id="play-editor"]')
+      .click('[data-id="compile-action"]')
       .waitForElementContainsText('*[data-id="terminalJournal"]', 'address:')
       .openFile('.states/vm-london/state.json')
       .waitForElementPresent('[data-id="treeViewDivDraggableItem.states/vm-london/state.json"]')
@@ -182,7 +184,8 @@ module.exports = {
 
   'Should ensure that .states is not updated when save env option is unchecked #group5': function (browser: NightwatchBrowser) {
     browser
-      .clickLaunchIcon('settings')
+      .waitForElementVisible('*[data-id="topbar-settingsIcon"]')
+      .click('*[data-id="topbar-settingsIcon"]')
       .waitForElementPresent('[data-id="settingsEnableSaveEnvStateLabel"]')
       .click('[data-id="settingsEnableSaveEnvStateLabel"]')
       .verify.elementNotPresent('[data-id="settingsEnableSaveEnvState"]:checked')

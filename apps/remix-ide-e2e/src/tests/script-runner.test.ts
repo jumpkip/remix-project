@@ -21,11 +21,13 @@ const tests = {
       .waitForElementVisible('*[data-id="verticalIconsKindfilePanel"]')
       .click('*[data-id="verticalIconsKindfilePanel"]')
       .waitForElementVisible('*[data-id="treeViewDivtreeViewItemscripts"]')
-      .click('*[data-id="treeViewDivtreeViewItemscripts"]')
+      // .click('*[data-id="treeViewDivtreeViewItemscripts"]')
+      .pause(2000)
       .waitForElementVisible('*[data-id="treeViewDivtreeViewItemscripts/deploy_with_ethers.ts"]')
       .click('*[data-id="treeViewDivtreeViewItemscripts/deploy_with_ethers.ts"]')
-      .waitForElementVisible('button[data-id="script-config"]')
-      .click('button[data-id="script-config"]')
+      .waitForElementVisible('*[data-id="run-script-dropdown-trigger"]')
+      .click('*[data-id="run-script-dropdown-trigger"]')
+      .click('*[data-id="open-script-configuration-menu-item"]')
       .waitForElementVisible('[data-id="sr-loaded-default"]')
       .waitForElementVisible('[data-id="dependency-ethers-^5"]')
       .waitForElementVisible('[data-id="sr-notloaded-ethers6"]')
@@ -68,12 +70,13 @@ const tests = {
     browser
       .clickLaunchIcon('filePanel')
       .pause(2000)
-      .waitForElementVisible('*[data-id="workspacesMenuDropdown"]')
-      .click('*[data-id="workspacesMenuDropdown"]')
+      .waitForElementVisible('*[data-id="workspacesSelect"]')
+      .click('*[data-id="workspacesSelect"]')
       .click('*[data-id="workspacecreate"]')
       .waitForElementPresent('*[data-id="create-semaphore"]')
       .scrollAndClick('*[data-id="create-semaphore"]')
       .modalFooterOKClick('TemplatesSelection')
+      .pause()
       .waitForElementVisible('*[data-id="treeViewLitreeViewItemcircuits/semaphore.circom"]')
       .waitForElementVisible({
         locateStrategy: 'xpath',
@@ -89,8 +92,8 @@ const tests = {
   },
   'open template that sets a config': function (browser: NightwatchBrowser) {
     browser
-      .waitForElementVisible('*[data-id="workspacesMenuDropdown"]')
-      .click('*[data-id="workspacesMenuDropdown"]')
+      .waitForElementVisible('*[data-id="workspacesSelect"]')
+      .click('*[data-id="workspacesSelect"]')
       .click('*[data-id="workspacecreate"]')
       .waitForElementPresent('*[data-id="create-introToEIP7702"]')
       .scrollAndClick('*[data-id="create-introToEIP7702"]')
@@ -110,8 +113,10 @@ const tests = {
   'reset to default after template': function (browser: NightwatchBrowser) {
     browser
       .refreshPage()
-      .waitForElementVisible('button[data-id="script-config"]')
-      .click('button[data-id="script-config"]')
+      .openFile('scripts/deploy.ts')
+      .waitForElementVisible('*[data-id="run-script-dropdown-trigger"]')
+      .click('*[data-id="run-script-dropdown-trigger"]')
+      .click('*[data-id="open-script-configuration-menu-item"]')
       .waitForElementVisible('[data-id="sr-notloaded-default"]')
       .waitForElementVisible('[data-id="sr-loaded-ethers6"]')
   },
@@ -129,7 +134,6 @@ const tests = {
       .waitForElementVisible('[data-id="sr-loaded-ethers6"]')
       .waitForElementPresent('[data-id="dependency-ethers-^6"]')
   },
-
 
 }
 

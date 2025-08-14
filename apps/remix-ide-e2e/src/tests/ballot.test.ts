@@ -95,7 +95,7 @@ module.exports = {
   'Compile with remappings set in remappings.txt file #group1': function (browser: NightwatchBrowser) {
     browser
       .clickLaunchIcon('filePanel')
-      .click('*[data-id="workspacesMenuDropdown"]')
+      .click('*[data-id="workspacesSelect"]')
       .click('*[data-id="workspacecreate"]')
       .waitForElementPresent('*[data-id="create-remixDefault"]')
       .scrollAndClick('*[data-id="create-remixDefault"]')
@@ -120,9 +120,7 @@ module.exports = {
       .connectToExternalHttpProvider('http://localhost:8545', 'Custom')
       .clickLaunchIcon('solidity')
       .clickLaunchIcon('udapp')
-      .clearValue('input[placeholder="bytes32[] proposalNames"]')
-      .setValue('input[placeholder="bytes32[] proposalNames"]', '["0x48656c6c6f20576f726c64210000000000000000000000000000000000000000"]')
-      .click('*[data-id="Deploy - transact (not payable)"]')
+      .createContract('["0x48656c6c6f20576f726c64210000000000000000000000000000000000000000"]')
       .clickInstance(0)
       .click('*[data-id="terminalClearConsole"]')
       .clickFunction('delegate - transact (not payable)', { types: 'address to', values: '0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c' })
@@ -171,7 +169,7 @@ module.exports = {
         suppressNotFoundErrors: true,
         timeout: 1000
       })
-      
+
       .waitForElementVisible('*[data-id="scConfigFilePathInput"]', 10000)
       .sendKeys('*[data-id="scConfigFilePathInput"]', 'cf.json')
       .sendKeys('*[data-id="scConfigFilePathInput"]', browser.Keys.ENTER)
@@ -202,7 +200,7 @@ module.exports = {
             suppressNotFoundErrors: true,
             timeout: 1000
           })
-          
+
           .waitForElementVisible('*[data-id="scConfigFilePathInput"]', 10000)
           .sendKeys('*[data-id="scConfigFilePathInput"]', 'cf.json')
           .sendKeys('*[data-id="scConfigFilePathInput"]', browser.Keys.ENTER)
@@ -235,7 +233,7 @@ module.exports = {
             suppressNotFoundErrors: true,
             timeout: 1000
           })
-          
+
           .waitForElementVisible('*[data-id="scConfigFilePathInput"]', 10000)
           .sendKeys('*[data-id="scConfigFilePathInput"]', 'cf.json')
           .sendKeys('*[data-id="scConfigFilePathInput"]', browser.Keys.ENTER)

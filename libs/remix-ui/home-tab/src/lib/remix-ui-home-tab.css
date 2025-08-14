@@ -111,7 +111,7 @@
 }
 
 .langSelectorbg {
-  background-color: var(--body-bg);
+  background-color: var(--bs-body-bg);
   color: var(--text);
 }
 
@@ -146,4 +146,10 @@
   .remixui_recentworkspace {
     height: 0.2rem;
   }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
 }

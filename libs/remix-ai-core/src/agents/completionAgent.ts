@@ -1,4 +1,5 @@
 import lunr from 'lunr';
+import { extractImportsFromFile } from "../helpers/localImportsExtractor";
 
 interface Document {
   id: number;
@@ -17,13 +18,17 @@ enum SupportedFileExtensions {
   solidity = '.sol',
   vyper = '.vy',
   circom = '.circom',
+  javascript = '.js',
+  typescript = '.ts',
+  tests_ts = '.test.ts',
+  tests_js = '.test.js',
 }
 
 export class CodeCompletionAgent {
   props: any;
   indexer: any;
   Documents: Document[] = [];
-  INDEX_THRESHOLD = 0.1;
+  INDEX_THRESHOLD = 0.05;
   N_MATCHES = 1;
   indexed: indexT = {
     isIndexed: false,
@@ -76,23 +81,10 @@ export class CodeCompletionAgent {
 
   async getLocalImports(fileContent: string, currentFile: string) {
     try {
-      const lines = fileContent.split('\n');
-      const imports = [];
-
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine.startsWith('import')) {
-          const parts = trimmedLine.split(' ');
-          if (parts.length >= 2) {
-            const importPath = parts[1].replace(/['";]/g, '');
-            imports.push(importPath);
-          }
-        }
-      }
-      // Only local imports are those files that are in the workspace
-      const localImports = this.Documents.length >0 ? imports.filter((imp) => {return this.Documents.find((doc) => doc.filename === imp);}) : [];
-
-      return localImports;
+      // Use extractImportsFromFile to get all imports from the current file
+      const imports = extractImportsFromFile(fileContent);
+      const localImports = imports.filter(imp => imp.isLocal);
+      return localImports.map(imp => imp.importPath);
     } catch (error) {
       return [];
     }
