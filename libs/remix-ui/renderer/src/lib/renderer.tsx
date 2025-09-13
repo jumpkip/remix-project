@@ -96,7 +96,7 @@ export const Renderer = ({ message, opt, plugin, context }: RendererProps) => {
       }
       const message = intl.formatMessage({ id: `${context || 'solidity' }.openaigptMessage` }, { content, messageText })
 
-      await plugin.call('popupPanel', 'showPopupPanel', true)
+      await plugin.call('menuicons' as any, 'select', 'remixaiassistant')
       setTimeout(async () => {
         await plugin.call('remixAI' as any, 'chatPipe', 'error_explaining', message)
       }, 500)
@@ -118,7 +118,7 @@ export const Renderer = ({ message, opt, plugin, context }: RendererProps) => {
               <span>{messageText}</span>
             </pre>
           )}
-          <div className="btn-close" data-id="renderer" onClick={handleClose}>
+          <div className="close" data-id="renderer" onClick={handleClose}>
             <i className="fas fa-times"></i>
           </div>
           <div className="d-flex pt-1 flex-row-reverse">
@@ -130,13 +130,14 @@ export const Renderer = ({ message, opt, plugin, context }: RendererProps) => {
               style={{ fontSize: "x-small", alignSelf: "end" }}
             >
             </span>
-            <span
-              className="button border ask-remix-ai-button text-ai btn-sm"
+            <button
+              className="btn btn-ai"
+              data-id="ask-remix-ai-button"
               onClick={(event) => { event.preventDefault(); askGtp() }}
-              style={{ borderColor: "var(--custom-ai-color)" }}
             >
-              Ask RemixAI
-            </span>
+              <img src="assets/img/remixAI_small.svg" alt="Remix AI" className="explain-icon" />
+              <span>Ask RemixAI</span>
+            </button>
 
           </div>
         </div>

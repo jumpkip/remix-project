@@ -139,23 +139,21 @@ export const HandleMistralAIResponse = async (streamResponse, cb: (streamText: s
     buffer = decoder.decode(value, { stream: true });
 
     const lines = buffer.split("\n");
-    buffer = lines.pop() ?? ""; // Keep the unfinished line for next chunk
     for (const line of lines) {
       if (line.startsWith("data: ")) {
         const jsonStr = line.replace(/^data: /, "").trim();
+        if (jsonStr === "[DONE]") {
+          done_cb?.(resultText, threadId);
+          return;
+        }
+
         try {
           const json = JSON.parse(jsonStr);
-          threadId = json?.conversation_id || threadId;
+          threadId = json?.id || threadId;
 
-          if (json.type === 'conversation.response.done') {
-            done_cb?.(resultText, threadId);
-            return;
-          }
-
-          if (typeof json.content === "string") {
-            cb(json.content);
-            resultText += json.content;
-          }
+          const content = json.choices[0].delta.content
+          cb(content);
+          resultText += content;
         } catch (e) {
           console.error("⚠️ MistralAI Stream parse error:", e);
         }
@@ -204,5 +202,71 @@ export const HandleAnthropicResponse = async (streamResponse, cb: (streamText: s
         }
       }
     }
+  }
+}
+
+export const HandleOllamaResponse = async (streamResponse: any, cb: (streamText: string) => void, done_cb?: (result: string) => void, reasoning_cb?: (result: string) => void) => {
+  const reader = streamResponse.body?.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let resultText = "";
+  let inThinking = false;
+
+  if (!reader) { // normal response, not a stream
+    cb(streamResponse.result || streamResponse.response || "");
+    done_cb?.(streamResponse.result || streamResponse.response || "");
+    return;
+  }
+
+  try {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n').filter(line => line.trim());
+
+      for (const line of lines) {
+        try {
+          const parsed = JSON.parse(line);
+          let content = "";
+          if (parsed.message?.thinking) {
+            reasoning_cb?.('***Thinking ...***')
+            inThinking = true
+            continue
+          }
+
+          if (parsed.response) {
+            // For /api/generate endpoint
+            content = parsed.response;
+          } else if (parsed.message?.content) {
+            if (inThinking) {
+              reasoning_cb?.("")
+              inThinking = false
+            }
+            // For /api/chat endpoint
+            content = parsed.message.content;
+          }
+
+          if (content) {
+            cb(content);
+            resultText += content;
+          }
+
+          if (parsed.done) {
+            done_cb?.(resultText);
+            return;
+          }
+        } catch (parseError) {
+          console.warn("Ollama: Skipping invalid JSON line:", line);
+          continue;
+        }
+      }
+    }
+
+    done_cb?.(resultText);
+  } catch (error) {
+    console.error("Ollama Stream error:", error);
+    done_cb?.(resultText);
   }
 }

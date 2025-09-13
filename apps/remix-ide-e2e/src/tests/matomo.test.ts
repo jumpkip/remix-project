@@ -42,14 +42,6 @@ module.exports = {
         console.log('_paq', res)
       })
       .waitForElementNotVisible('*[data-id="matomoModalModalDialogModalBody-react"]')
-      .waitForElementVisible('*[data-id="beginnerbtn"]', 10000)
-      .pause(1000)
-      .click('[data-id="beginnerbtn"]')
-      .waitForElementNotPresent('*[data-id="beginnerbtn"]')
-      .waitForElementVisible({
-        selector: `//*[contains(text(), 'Welcome to Remix IDE')]`,
-        locateStrategy: 'xpath'
-      })
       .refreshPage()
       .waitForElementPresent({
         selector: `//*[@data-id='compilerloaded']`,
@@ -59,7 +51,11 @@ module.exports = {
       .waitForElementNotPresent('*[data-id="matomoModalModalDialogModalBody-react"]')
       .waitForElementVisible('*[data-id="topbar-settingsIcon"]')
       .click('*[data-id="topbar-settingsIcon"]')
-      .verify.elementPresent('[id="settingsMatomoPerfAnalytics"]:checked')
+      .waitForElementVisible('*[data-id="settings-sidebar-analytics"]')
+      .click('*[data-id="settings-sidebar-analytics"]')
+      .waitForElementVisible('*[data-id="matomo-analyticsSwitch"]')
+      .verify.elementPresent('[data-id="matomo-analyticsSwitch"] .fa-toggle-on')
+      .verify.elementPresent('[data-id="matomo-perf-analyticsSwitch"] .fa-toggle-on')
       .execute(function () {
         return JSON.parse(window.localStorage.getItem('config-v0.8:.remix.config'))['settings/matomo-analytics'] == true
       }, [], (res) => {
@@ -98,17 +94,12 @@ module.exports = {
       .click('*[data-id="matomoPerfAnalyticsToggleSwitch"]') // disable matomo perf analytics3
       .click('[data-id="managePreferencesModal-modal-footer-ok-react"]') // click on Save Preferences
       .pause(2000)
-      .waitForElementPresent('*[data-id="beginnerbtn"]', 10000)
-      .click('[data-id="beginnerbtn"]')
-      .waitForElementVisible({
-        selector: `//*[contains(text(), 'Welcome to Remix IDE')]`,
-        locateStrategy: 'xpath'
-      })
-      .waitForElementVisible('*[id="remixTourSkipbtn"]')
-      .click('*[id="remixTourSkipbtn"]')
       .waitForElementVisible('*[data-id="topbar-settingsIcon"]')
       .click('*[data-id="topbar-settingsIcon"]')
-      .waitForElementNotPresent('[id="settingsMatomoPerfAnalytics"]:checked')
+      .waitForElementVisible('*[data-id="settings-sidebar-analytics"]')
+      .click('*[data-id="settings-sidebar-analytics"]')
+      .waitForElementVisible('*[data-id="matomo-perf-analyticsSwitch"]')
+      .verify.elementPresent('[data-id="matomo-perf-analyticsSwitch"] .fa-toggle-off')
       .execute(function () {
         return JSON.parse(window.localStorage.getItem('config-v0.8:.remix.config'))['settings/matomo-perf-analytics'] == false
       }, [], (res) => {
@@ -118,9 +109,7 @@ module.exports = {
   },
   'change settings #group2': function (browser: NightwatchBrowser) {
     browser
-      .waitForElementVisible('*[data-id="label-matomo-settings"]')
-      .pause(1000)
-      .click('*[data-id="label-matomo-settings"]')
+      .click('*[data-id="matomo-perf-analyticsSwitch"]')
       .refreshPage()
       .waitForElementPresent({
         selector: `//*[@data-id='compilerloaded']`,
@@ -130,8 +119,11 @@ module.exports = {
       .waitForElementNotPresent('*[data-id="matomoModalModalDialogModalBody-react"]')
       .waitForElementVisible('*[data-id="topbar-settingsIcon"]')
       .click('*[data-id="topbar-settingsIcon"]')
-      .waitForElementVisible('*[data-id="label-matomo-settings"]')
-      .click('*[data-id="label-matomo-settings"]') // disable again
+      .waitForElementVisible('*[data-id="settings-sidebar-analytics"]')
+      .click('*[data-id="settings-sidebar-analytics"]')
+      .waitForElementVisible('*[data-id="matomo-perf-analyticsSwitch"]')
+      .verify.elementPresent('[data-id="matomo-perf-analyticsSwitch"] .fa-toggle-on')
+      .click('*[data-id="matomo-perf-analyticsSwitch"]') // disable again
       .pause(2000)
       .refreshPage()
   },

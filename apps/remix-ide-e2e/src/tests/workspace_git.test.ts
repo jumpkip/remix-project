@@ -38,14 +38,13 @@ module.exports = {
     browser
       .waitForElementVisible('*[data-id="topbar-settingsIcon"]')
       .click('*[data-id="topbar-settingsIcon"]')
-      .setValue('[data-id="settingsTabGithubUsername"]', 'circleci')
-      .setValue('[data-id="settingsTabGithubEmail"]', 'remix@circleci.com')
-      .click('[data-id="settingsTabSaveGistToken"]')
+      .setValue('[data-id="settingsTabgithub-user-name"]', 'circleci')
+      .setValue('[data-id="settingsTabgithub-email"]', 'remix@circleci.com')
+      .click('[data-id="settingsTabSavegithub-config"]')
   },
 
   'Should create and initialize a GIT repository #group1': function (browser: NightwatchBrowser) {
     browser
-      .clickLaunchIcon('filePanel')
       // .waitForElementNotVisible('[data-id="workspaceGitPanel"]')
       .click('*[data-id="workspacesSelect"]')
       .click('*[data-id="workspacecreate"]')
@@ -89,7 +88,7 @@ module.exports = {
       .waitForElementVisible('[data-id="topbarModalModalDialogModalBody-react"]')
       .click('[data-id="topbarModalModalDialogModalBody-react"]')
       .waitForElementVisible('[data-id="modalDialogCustomPromptTextClone"]')
-      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/ethereum/awesome-remix')
+      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/remix-project-org/awesome-remix')
       .click('[data-id="topbarModal-modal-footer-ok-react"]')
       .waitForElementPresent('.fa-spinner')
       .pause(5000)
@@ -115,7 +114,7 @@ module.exports = {
       .waitForElementVisible('[data-id="topbarModalModalDialogModalBody-react"]')
       .click('[data-id="topbarModalModalDialogModalBody-react"]')
       .waitForElementVisible('[data-id="modalDialogCustomPromptTextClone"]')
-      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/ethereum/awesome-remix')
+      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/remix-project-org/awesome-remix')
       .click('[data-id="topbarModal-modal-footer-ok-react"]')
       .pause(5000)
       .waitForElementContainsText('[data-id="workspacesSelect"]', 'awesome-remix1')
@@ -126,7 +125,7 @@ module.exports = {
       .waitForElementVisible('[data-id="topbarModalModalDialogModalBody-react"]')
       .click('[data-id="topbarModalModalDialogModalBody-react"]')
       .waitForElementVisible('[data-id="modalDialogCustomPromptTextClone"]')
-      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/ethereum/awesome-remix')
+      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/remix-project-org/awesome-remix')
       .click('[data-id="topbarModal-modal-footer-ok-react"]')
       .pause(5000)
       .waitForElementContainsText('[data-id="workspacesSelect"]', 'awesome-remix2')
@@ -137,7 +136,7 @@ module.exports = {
       .waitForElementVisible('[data-id="topbarModalModalDialogModalBody-react"]')
       .click('[data-id="topbarModalModalDialogModalBody-react"]')
       .waitForElementVisible('[data-id="modalDialogCustomPromptTextClone"]')
-      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/ethereum/awesome-remix')
+      .setValue('[data-id="modalDialogCustomPromptTextClone"]', 'https://github.com/remix-project-org/awesome-remix')
       .click('[data-id="topbarModal-modal-footer-ok-react"]')
       .pause(5000)
       .waitForElementContainsText('[data-id="workspacesSelect"]', 'awesome-remix3')

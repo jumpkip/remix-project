@@ -182,7 +182,7 @@ export const EditorUI = (props: EditorUIProps) => {
   \t\t\t\t\t\t\t\t${intl.formatMessage({ id: 'editor.importantLinks.text1' })}: https://remix-project.org/\n
   \t\t\t\t\t\t\t\t${intl.formatMessage({ id: 'editor.importantLinks.text2' })}: https://remix-ide.readthedocs.io/en/latest/\n
   \t\t\t\t\t\t\t\tGithub: https://github.com/ethereum/remix-project\n
-  \t\t\t\t\t\t\t\tDiscord: https://discord.gg/ATKsctCS2F\n
+  \t\t\t\t\t\t\t\tDiscord: https://discord.gg/KhDtC8mGqx\n
   \t\t\t\t\t\t\t\tMedium: https://medium.com/remix-ide\n
   \t\t\t\t\t\t\t\tX: https://x.com/ethereumremix\n
   `
@@ -839,7 +839,7 @@ export const EditorUI = (props: EditorUIProps) => {
         if (changes.some(change => change.text === inlineCompletionProvider.currentCompletion.item.insertText)) {
           inlineCompletionProvider.currentCompletion.onAccepted()
           inlineCompletionProvider.currentCompletion.accepted = true
-          _paq.push(['trackEvent', 'ai', 'remixAI', inlineCompletionProvider.currentCompletion.task + '_accepted'])
+          _paq.push(['trackEvent', 'ai', 'remixAI', 'Copilot_Completion_Accepted'])
         }
       }
     });

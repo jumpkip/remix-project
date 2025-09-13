@@ -18,6 +18,7 @@ interface panels {
   tabs: panelState
   editor: panelState
   main: panelState
+  bottomBar: panelState
   terminal: panelState
 }
 
@@ -36,10 +37,10 @@ export class Layout extends Plugin {
     super(profile)
     this.maximized = {
       // 'remixaiassistant': true
+      'LearnEth': true,
     }
     this.enhanced = {
       'dgit': true,
-      'LearnEth': true,
       'remixaiassistant': true
     }
     this.event = new EventEmitter()
