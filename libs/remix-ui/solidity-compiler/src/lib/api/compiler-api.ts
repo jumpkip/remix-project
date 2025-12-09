@@ -315,6 +315,7 @@ export const CompilerApiMixin = (Base) => class extends Base {
         } else this.statusChanged({ key: 'succeed', title: 'Compilation successful', type: 'success' })
       } else {
         this.emit('compilationFailed', source.target, source, 'soljson', data, input, version)
+        this.compileTabLogic.compiler.state.lastCompilationResult = data
         const count = (data.errors ? data.errors.filter(error => error.severity === 'error').length : 0 + (data.error ? 1 : 0))
         this.statusChanged({ key: count, title: `Compilation failed with ${count} error${count > 1 ? 's' : ''}`, type: 'error' })
       }
@@ -366,7 +367,9 @@ export const CompilerApiMixin = (Base) => class extends Base {
         if (this.currentFile && (this.currentFile.endsWith('.sol') || this.currentFile.endsWith('.yul'))) {
           if (await this.getAppParameter('hardhat-compilation')) this.compileTabLogic.runCompiler('hardhat')
           else if (await this.getAppParameter('truffle-compilation')) this.compileTabLogic.runCompiler('truffle')
-          else this.compileTabLogic.runCompiler(undefined)
+          else this.compileTabLogic.runCompiler(undefined).catch((error) => {
+            this.call('notification', 'toast', error.message)
+          })
         } else if (this.currentFile && this.currentFile.endsWith('.circom')) {
           await this.call('circuit-compiler', 'compile', this.currentFile)
         } else if (this.currentFile && this.currentFile.endsWith('.vy')) {

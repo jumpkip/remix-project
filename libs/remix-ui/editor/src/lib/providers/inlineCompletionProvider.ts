@@ -1,14 +1,13 @@
 /* eslint-disable no-control-regex */
 import { EditorUIProps, monacoTypes } from '@remix-ui/editor';
 import { CompletionParams } from '@remix/remix-ai-core';
-import * as monaco from 'monaco-editor';
+import { trackMatomoEvent, AIEvent, MatomoEvent } from '@remix-api'
+// Do not import monaco runtime here to avoid bundling it. Use types and the injected instance instead.
 import {
   AdaptiveRateLimiter,
   SmartContextDetector,
   CompletionCache,
 } from '../inlineCompetionsLibs';
-
-const _paq = (window._paq = window._paq || [])
 
 export class RemixInLineCompletionProvider implements monacoTypes.languages.InlineCompletionsProvider {
   props: EditorUIProps
@@ -16,14 +15,16 @@ export class RemixInLineCompletionProvider implements monacoTypes.languages.Inli
   completionEnabled: boolean
   task: string = 'code_completion'
   currentCompletion: any
+  trackMatomoEvent?: (event: AIEvent) => void
 
   private rateLimiter: AdaptiveRateLimiter;
   private contextDetector: SmartContextDetector;
   private cache: CompletionCache;
 
-  constructor(props: any, monaco: any) {
+  constructor(props: any, monaco: any, trackMatomoEvent?: (event: AIEvent) => void) {
     this.props = props
     this.monaco = monaco
+    this.trackMatomoEvent = trackMatomoEvent
     this.completionEnabled = true
     this.currentCompletion = {
       text: '',
@@ -201,14 +202,14 @@ export class RemixInLineCompletionProvider implements monacoTypes.languages.Inli
     })
 
     const data = await this.props.plugin.call('remixAI', 'code_insertion', word, word_after)
-    _paq.push(['trackEvent', 'ai', 'remixAI', 'code_generation'])
+    this.trackMatomoEvent?.({ category: 'ai', action: 'remixAI', name: 'code_generation', isClick: false })
     this.task = 'code_generation'
 
     const parsedData = data.trimStart()
     const item: monacoTypes.languages.InlineCompletion = {
       insertText: parsedData,
-      range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
-    };
+      range: new this.monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+    }
 
     this.currentCompletion.text = parsedData
     this.currentCompletion.item = item
@@ -227,13 +228,13 @@ export class RemixInLineCompletionProvider implements monacoTypes.languages.Inli
     try {
       CompletionParams.stop = ['\n\n', '```']
       const output = await this.props.plugin.call('remixAI', 'code_insertion', word, word_after, CompletionParams)
-      _paq.push(['trackEvent', 'ai', 'remixAI', 'code_insertion'])
+      this.trackMatomoEvent?.({ category: 'ai', action: 'remixAI', name: 'code_insertion', isClick: false })
       const generatedText = output
 
       this.task = 'code_insertion'
       const item: monacoTypes.languages.InlineCompletion = {
         insertText: generatedText,
-        range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+        range: new this.monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
       };
 
       this.currentCompletion.text = generatedText
@@ -258,7 +259,7 @@ export class RemixInLineCompletionProvider implements monacoTypes.languages.Inli
       CompletionParams.stop = ['\n', '```']
       this.task = 'code_completion'
       const output = await this.props.plugin.call('remixAI', 'code_completion', word, word_after, CompletionParams)
-      _paq.push(['trackEvent', 'ai', 'remixAI', 'code_completion'])
+      this.trackMatomoEvent?.({ category: 'ai', action: 'remixAI', name: 'code_completion', isClick: false })
       const generatedText = output
       let clean = generatedText
 
@@ -267,12 +268,10 @@ export class RemixInLineCompletionProvider implements monacoTypes.languages.Inli
       }
       clean = clean.replace(word, '')
       clean = this.process_completion(clean, word_after)
-
       const item: monacoTypes.languages.InlineCompletion = {
         insertText: clean,
-        range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+        range: new this.monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
       };
-
       this.currentCompletion.text = clean
       this.currentCompletion.item = item
       return {
@@ -306,7 +305,7 @@ export class RemixInLineCompletionProvider implements monacoTypes.languages.Inli
     this.currentCompletion.task = this.task
 
     this.rateLimiter.trackCompletionShown()
-    _paq.push(['trackEvent', 'ai', 'remixAI', this.task + '_did_show'])
+    this.trackMatomoEvent?.({ category: 'ai', action: 'completion', name: this.task + '_did_show', isClick: true })
   }
 
   handlePartialAccept?(
@@ -318,7 +317,7 @@ export class RemixInLineCompletionProvider implements monacoTypes.languages.Inli
     this.currentCompletion.task = this.task
 
     this.rateLimiter.trackCompletionAccepted()
-    _paq.push(['trackEvent', 'ai', 'remixAI', this.task + '_partial_accept'])
+    this.trackMatomoEvent?.({ category: 'ai', action: 'completion', name: this.task + '_partial_accept', isClick: true })
   }
 
   freeInlineCompletions(

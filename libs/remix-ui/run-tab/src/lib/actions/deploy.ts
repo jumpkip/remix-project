@@ -1,4 +1,5 @@
-import { ContractData, FuncABI, NetworkDeploymentFile, SolcBuildFile, OverSizeLimit } from "@remix-project/core-plugin"
+import { ContractData, FuncABI, NetworkDeploymentFile, SolcBuildFile, OverSizeLimit, getContractData } from "@remix-project/core-plugin"
+import { trackMatomoEvent } from '@remix-api'
 import { RunTab } from "../types/run-tab"
 import { CompilerAbstract as CompilerAbstractType } from '@remix-project/remix-solidity'
 import * as remixLib from '@remix-project/remix-lib'
@@ -9,15 +10,8 @@ import { DeployMode, MainnetPrompt } from "../types"
 import { displayNotification, fetchProxyDeploymentsSuccess, setDecodedResponse, updateInstancesBalance } from "./payload"
 import { addInstance } from "./actions"
 import { addressToString, logBuilder } from "@remix-ui/helper"
-import { Web3 } from "web3"
+import { isAddress } from "ethers"
 
-declare global {
-  interface Window {
-    _paq: any
-  }
-}
-
-const _paq = window._paq = window._paq || []  //eslint-disable-line
 const txHelper = remixLib.execution.txHelper
 const txFormat = remixLib.execution.txFormat
 
@@ -31,55 +25,12 @@ const loadContractFromAddress = (plugin: RunTab, address, confirmCb, cb) => {
       } catch (e) {
         return cb('Failed to parse the current file as JSON ABI.')
       }
-      _paq.push(['trackEvent', 'udapp', 'useAtAddress' , 'AtAddressLoadWithABI'])
+      trackMatomoEvent(plugin, { category: 'udapp', action: 'useAtAddress', name: 'AtAddressLoadWithABI', isClick: true })
       cb(null, 'abi', abi)
     })
   } else {
-    _paq.push(['trackEvent', 'udapp', 'useAtAddress', 'AtAddressLoadWithArtifacts'])
+    trackMatomoEvent(plugin, { category: 'udapp', action: 'useAtAddress', name: 'AtAddressLoadWithArtifacts', isClick: true })
     cb(null, 'instance')
-  }
-}
-
-export const getSelectedContract = (contractName: string, compiler: CompilerAbstractType): ContractData => {
-  if (!contractName) return null
-  // const compiler = plugin.compilersArtefacts[compilerAttributeName]
-
-  if (!compiler) return null
-
-  const contract = compiler.getContract(contractName)
-
-  return {
-    name: contractName,
-    contract: contract,
-    compiler: compiler,
-    abi: contract.object.abi,
-    bytecodeObject: contract.object.evm.bytecode.object,
-    bytecodeLinkReferences: contract.object.evm.bytecode.linkReferences,
-    object: contract.object,
-    deployedBytecode: contract.object.evm.deployedBytecode,
-    getConstructorInterface: () => {
-      return txHelper.getConstructorInterface(contract.object.abi)
-    },
-    getConstructorInputs: () => {
-      const constructorInterface = txHelper.getConstructorInterface(contract.object.abi)
-
-      return txHelper.inputParametersDeclarationToString(constructorInterface.inputs)
-    },
-    isOverSizeLimit: async (args: string) => {
-      const encodedParams = await txFormat.encodeParams(args, txHelper.getConstructorInterface(contract.object.abi))
-      const bytecode = contract.object.evm.bytecode.object + (encodedParams as any).dataHex
-      // https://eips.ethereum.org/EIPS/eip-3860
-      const initCodeOversize = bytecode && (bytecode.length / 2 > 2 * 24576)
-
-      const deployedBytecode = contract.object.evm.deployedBytecode
-      // https://eips.ethereum.org/EIPS/eip-170
-      const deployedBytecodeOversize = deployedBytecode && (deployedBytecode.object.length / 2 > 24576)
-      return {
-        overSizeEip3860: initCodeOversize,
-        overSizeEip170: deployedBytecodeOversize
-      }
-    },
-    metadata: contract.object.metadata
   }
 }
 
@@ -161,7 +112,8 @@ export const createInstance = async (
   mainnetPrompt: MainnetPrompt,
   isOverSizePrompt: (values: OverSizeLimit) => JSX.Element,
   args,
-  deployMode: DeployMode[]) => {
+  deployMode: DeployMode[],
+  isVerifyChecked: boolean) => {
   const isProxyDeployment = (deployMode || []).find(mode => mode === 'Deploy with Proxy')
   const isContractUpgrade = (deployMode || []).find(mode => mode === 'Upgrade with Proxy')
   const statusCb = (msg: string) => {
@@ -173,22 +125,63 @@ export const createInstance = async (
   const finalCb = async (error, contractObject, address) => {
     if (error) {
       const log = logBuilder(error)
-
       return terminalLogger(plugin, log)
     }
+
     addInstance(dispatch, { contractData: contractObject, address, name: contractObject.name })
     const data = await plugin.compilersArtefacts.getCompilerAbstract(contractObject.contract.file)
-
     plugin.compilersArtefacts.addResolvedContract(addressToString(address), data)
-    if (plugin.REACT_API.ipfsChecked) {
-      _paq.push(['trackEvent', 'udapp', 'DeployAndPublish', plugin.REACT_API.networkName])
-      publishToStorage('ipfs', selectedContract)
+
+    if (isVerifyChecked) {
+      trackMatomoEvent(plugin, { category: 'udapp', action: 'DeployAndPublish', name: plugin.REACT_API.networkName, isClick: true })
+
+      try {
+        const status = plugin.blockchain.getCurrentNetworkStatus()
+        if (status.error || !status.network) {
+          throw new Error(`Could not get network status: ${status.error || 'Unknown error'}`)
+        }
+        const currentChainId = parseInt(status.network.id)
+
+        const response = await fetch('https://chainid.network/chains.json')
+        if (!response.ok) throw new Error('Could not fetch chains list from chainid.network.')
+        const allChains = await response.json()
+        const currentChain = allChains.find(chain => chain.chainId === currentChainId)
+
+        if (!currentChain) {
+          const errorMsg = `Could not find chain data for Chain ID: ${currentChainId}. Verification cannot proceed.`
+          const errorLog = logBuilder(errorMsg)
+          terminalLogger(plugin, errorLog)
+          return
+        }
+
+        const etherscanApiKey = await plugin.call('config', 'getAppParameter', 'etherscan-access-token')
+
+        const verificationData = {
+          chainId: currentChainId.toString(),
+          currentChain: currentChain,
+          contractAddress: addressToString(address),
+          contractName: selectedContract.name,
+          compilationResult: await plugin.compilersArtefacts.getCompilerAbstract(selectedContract.contract.file),
+          constructorArgs: args,
+          etherscanApiKey: etherscanApiKey
+        }
+
+        setTimeout(async () => {
+          await plugin.call('contract-verification', 'verifyOnDeploy', verificationData)
+        }, 1500)
+
+      } catch (e) {
+        const errorMsg = `Verification setup failed: ${e.message}`
+        const errorLog = logBuilder(errorMsg)
+        terminalLogger(plugin, errorLog)
+      }
+
     } else {
-      _paq.push(['trackEvent', 'udapp', 'DeployOnly', plugin.REACT_API.networkName])
+      trackMatomoEvent(plugin, { category: 'udapp', action: 'DeployOnly', name: plugin.REACT_API.networkName, isClick: true })
     }
+
     if (isProxyDeployment) {
       const initABI = contractObject.abi.find(abi => abi.name === 'initialize')
-
       plugin.call('openzeppelin-proxy', 'executeUUPSProxy', addressToString(address), args, initABI, contractObject)
     } else if (isContractUpgrade) {
       plugin.call('openzeppelin-proxy', 'executeUUPSContractUpgrade', args, addressToString(address), contractObject)
@@ -243,7 +236,7 @@ export const createInstance = async (
 }
 
 const deployContract = (plugin: RunTab, selectedContract, args, contractMetadata, compilerContracts, callbacks, confirmationCb) => {
-  _paq.push(['trackEvent', 'udapp', 'DeployContractTo', plugin.REACT_API.networkName])
+  trackMatomoEvent(plugin, { category: 'udapp', action: 'DeployContractTo', name: plugin.REACT_API.networkName, isClick: true })
   const { statusCb } = callbacks
 
   if (!contractMetadata || (contractMetadata && contractMetadata.autoDeployLib)) {
@@ -269,7 +262,7 @@ export const loadAddress = (plugin: RunTab, dispatch: React.Dispatch<any>, contr
         if (!contract) return plugin.call('notification', 'toast', 'No compiled contracts found.')
         const currentFile = plugin.REACT_API.contracts.currentFile
         const compiler = plugin.REACT_API.contracts.contractList[currentFile].find(item => item.alias === contract.name)
-        const contractData = getSelectedContract(contract.name, compiler.compiler)
+        const contractData = getContractData(contract.name, compiler.compiler)
         return addInstance(dispatch, { contractData, address, name: contract.name })
       }
     }
@@ -308,10 +301,18 @@ export const runTransactions = (
   passphrasePrompt: (msg: string) => JSX.Element,
   funcIndex?: number) => {
   let callinfo = ''
-  if (lookupOnly) callinfo = 'call'
-  else if (funcABI.type === 'fallback' || funcABI.type === 'receive') callinfo = 'lowLevelinteractions'
-  else callinfo = 'transact'
-  _paq.push(['trackEvent', 'udapp', callinfo, plugin.REACT_API.networkName])
+  let eventAction
+  if (lookupOnly) {
+    callinfo = 'call'
+    eventAction = 'call'
+  } else if (funcABI.type === 'fallback' || funcABI.type === 'receive') {
+    callinfo = 'lowLevelinteractions'
+    eventAction = 'lowLevelinteractions'
+  } else {
+    callinfo = 'transact'
+    eventAction = 'transact'
+  }
+  trackMatomoEvent(plugin, { category: 'udapp', action: eventAction, name: plugin.REACT_API.networkName, isClick: true })
 
   const params = funcABI.type !== 'fallback' ? inputsValues : ''
   plugin.blockchain.runOrCallContractMethod(
@@ -365,8 +366,8 @@ export const isValidContractAddress = async (plugin: RunTab, address: string) =>
   if (!address) {
     return false
   } else {
-    if (Web3.utils.isAddress(address)) {
-      return await plugin.blockchain.web3().eth.getCode(address) !== '0x'
+    if (isAddress(address)) {
+      return await plugin.blockchain.web3().getCode(address) !== '0x'
     } else {
       return false
     }

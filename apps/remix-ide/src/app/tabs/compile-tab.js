@@ -23,7 +23,7 @@ const profile = {
   documentation: 'https://remix-ide.readthedocs.io/en/latest/compile.html',
   version: packageJson.version,
   maintainedBy: 'Remix',
-  methods: ['getCompilationResult', 'compile', 'compileWithParameters', 'setCompilerConfig', 'compileFile', 'getCompilerState', 'getCompilerConfig', 'getCompilerQueryParameters', 'getCompiler']
+  methods: ['getCompilationResult', 'compile', 'compileWithParameters', 'setCompilerConfig', 'compileFile', 'getCompilerState', 'getCompilerQueryParameters', 'getCompiler', 'getCurrentCompilerConfig', 'compile']
 }
 
 // EditorApi:
@@ -114,13 +114,9 @@ export default class CompileTab extends CompilerApiMixin(ViewPlugin) { // implem
     }
   }
 
-  async getCompilerConfig() {
-    return await super.getCompilerConfig()
-  }
-
   compile(fileName) {
     if (!isNative(this.currentRequest.from)) this.call('notification', 'toast', compileToastMsg(this.currentRequest.from, fileName))
-    super.compile(fileName)
+    return super.compile(fileName)
   }
 
   compileFile(event) {

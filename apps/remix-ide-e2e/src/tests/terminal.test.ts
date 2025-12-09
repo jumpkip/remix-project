@@ -247,7 +247,7 @@ module.exports = {
         .execute(() => {
           (document.querySelector('*[data-id="basic-http-providerModalDialogContainer-react"] input[data-id="modalDialogCustomPromp"]') as any).focus()
         }, [], () => { })
-        .setValue('[data-id="modalDialogCustomPromp"]', 'https://go.getblock.io/ee42d0a88f314707be11dd799b122cb9')
+        .setValue('[data-id="modalDialogCustomPromp"]', 'https://go.getblock.io/7fbe62b139884d2c9c1616ca0de8b5b2')
         .modalFooterOKClick('basic-http-provider')
         .clickLaunchIcon('filePanel')
         .openFile('README.txt')
@@ -345,7 +345,7 @@ module.exports = {
         .execute(() => {
           (document.querySelector('*[data-id="vm-custom-forkModalDialogContainer-react"] input[data-id="CustomForkNodeUrl"]') as any).focus()
         }, [], () => { })
-        .clearValue('*[data-id="CustomForkNodeUrl"]').pause(1000).setValue('*[data-id="CustomForkNodeUrl"]', 'https://go.getblock.io/ee42d0a88f314707be11dd799b122cb9')
+        .clearValue('*[data-id="CustomForkNodeUrl"]').pause(1000).setValue('*[data-id="CustomForkNodeUrl"]', 'https://go.getblock.io/7fbe62b139884d2c9c1616ca0de8b5b2')
         .execute(() => {
           (document.querySelector('*[data-id="vm-custom-forkModalDialogContainer-react"] input[data-id="CustomForkBlockNumber"]') as any).focus()
         }, [], () => { })
@@ -382,7 +382,7 @@ module.exports = {
     }
 
     function resolveENS() view {
-        // Same address for Mainnet, Ropsten, Rinkerby, Gorli and other networks;
+        // Same address for Mainnet and other networks;
         ENS ens = ENS(0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e);
         (,bytes32 node) = NameEncoder.dnsEncodeName("vitalik.eth");
         Resolver resolver = ens.resolver(node);

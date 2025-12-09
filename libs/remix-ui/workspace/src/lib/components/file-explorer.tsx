@@ -12,6 +12,9 @@ import { ROOT_PATH } from '../utils/constants'
 import { copyFile, moveFileIsAllowed, moveFilesIsAllowed, moveFolderIsAllowed, moveFoldersIsAllowed } from '../actions'
 import { FlatTree } from './flat-tree'
 import { FileSystemContext } from '../contexts'
+import { AppContext } from '@remix-ui/app'
+import { TrackingContext } from '@remix-ide/tracking'
+import { FileExplorerEvent } from '@remix-api'
 
 export const FileExplorer = (props: FileExplorerProps) => {
   const intl = useIntl()
@@ -45,7 +48,10 @@ export const FileExplorer = (props: FileExplorerProps) => {
   const treeRef = useRef<HTMLDivElement>(null)
   const [cutActivated, setCutActivated] = useState(false)
 
-  const { plugin } = useContext(FileSystemContext)
+  const { plugin, dispatchRevealElectronFolderInExplorer } = useContext(FileSystemContext)
+  const appContext = useContext(AppContext)
+  const { trackMatomoEvent: baseTrackEvent } = useContext(TrackingContext)
+  const trackMatomoEvent = <T extends FileExplorerEvent = FileExplorerEvent>(event: T) => baseTrackEvent?.<T>(event)
   const [filesSelected, setFilesSelected] = useState<string[]>([])
   const feWindow = (window as any)
 
@@ -123,7 +129,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
     if (treeRef.current) {
       const deleteKeyPressHandler = async (eve: KeyboardEvent) => {
         if (eve.key === 'Delete' ) {
-          feWindow._paq.push(['trackEvent', 'fileExplorer', 'deleteKey', 'deletePath'])
+          trackMatomoEvent({ category: 'fileExplorer', action: 'deleteKey', name: 'deletePath', isClick: false })
           setState((prevState) => {
             return { ...prevState, deleteKey: true }
           })
@@ -132,7 +138,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
         }
         if (eve.metaKey) {
           if (eve.key === 'Backspace') {
-            feWindow._paq.push(['trackEvent', 'fileExplorer', 'osxDeleteKey', 'deletePath'])
+            trackMatomoEvent({ category: 'fileExplorer', action: 'osxDeleteKey', name: 'deletePath', isClick: false })
             setState((prevState) => {
               return { ...prevState, deleteKey: true }
             })
@@ -178,7 +184,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
     if (treeRef.current) {
       const F2KeyPressHandler = async (eve: KeyboardEvent) => {
         if (eve.key === 'F2' ) {
-          feWindow._paq.push(['trackEvent', 'fileExplorer', 'f2ToRename', 'RenamePath'])
+          trackMatomoEvent({ category: 'fileExplorer', action: 'f2ToRename', name: 'RenamePath', isClick: false })
           await performRename()
           setState((prevState) => {
             return { ...prevState, F2Key: true }
@@ -267,7 +273,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
       const CopyComboHandler = async (eve: KeyboardEvent) => {
         if ((eve.metaKey || eve.ctrlKey) && (eve.key === 'c' || eve.code === 'KeyC')) {
           await performCopy()
-          feWindow._paq.push(['trackEvent', 'fileExplorer', 'copyCombo', 'copyFilesOrFile'])
+          trackMatomoEvent({ category: 'fileExplorer', action: 'copyCombo', name: 'copyFilesOrFile', isClick: false })
           return
         }
       }
@@ -275,7 +281,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
       const CutHandler = async (eve: KeyboardEvent) => {
         if ((eve.metaKey || eve.ctrlKey) && (eve.key === 'x' || eve.code === 'KeyX')) {
           await performCut()
-          feWindow._paq.push(['trackEvent', 'fileExplorer', 'cutCombo', 'cutFilesOrFile'])
+          trackMatomoEvent({ category: 'fileExplorer', action: 'cutCombo', name: 'cutFilesOrFile', isClick: false })
           return
         }
       }
@@ -283,7 +289,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
       const pasteHandler = async (eve: KeyboardEvent) => {
         if ((eve.metaKey || eve.ctrlKey) && (eve.key === 'v' || eve.code === 'KeyV')) {
           performPaste()
-          feWindow._paq.push(['trackEvent', 'fileExplorer', 'pasteCombo', 'PasteCopiedContent'])
+          trackMatomoEvent({ category: 'fileExplorer', action: 'pasteCombo', name: 'PasteCopiedContent', isClick: false })
           return
         }
       }
@@ -343,17 +349,6 @@ export const FileExplorer = (props: FileExplorerProps) => {
         async () => { }
       )
     }
-  }
-
-  const publishToGist = (path?: string) => {
-    props.modal(
-      intl.formatMessage({ id: 'filePanel.createPublicGist' }),
-      intl.formatMessage({ id: 'filePanel.createPublicGistMsg4' }, { name }),
-      intl.formatMessage({ id: 'filePanel.ok' }),
-      () => toGist(path),
-      intl.formatMessage({ id: 'filePanel.cancel' }),
-      () => { }
-    )
   }
 
   const handleClickFile = (path: string, type: WorkspaceElement) => {
@@ -581,12 +576,6 @@ export const FileExplorer = (props: FileExplorerProps) => {
 
   }
 
-  const handleGitInit = async () => {
-    const isActive = await plugin.call('manager', 'isActive', 'dgit')
-    if (!isActive) await plugin.call('manager', 'activatePlugin', 'dgit')
-    await plugin.call('dgit', 'init')
-  }
-
   return (
     <div className="h-100 remixui_treeview" data-id="filePanelFileExplorerTree">
       <div ref={treeRef} tabIndex={0} style={{
@@ -603,22 +592,7 @@ export const FileExplorer = (props: FileExplorerProps) => {
             data-id={`treeViewDivMenu`}
             className={`d-flex flex-row align-items-center`}
           >
-            <span className="w-100 ps-2 mt-1">
-              <div onClick={handleFileExplorerMenuClick}>
-                <FileExplorerMenu
-                  title={''}
-                  menuItems={props.menuItems}
-                  createNewFile={handleNewFileInput}
-                  createNewFolder={handleNewFolderInput}
-                  publishToGist={publishToGist}
-                  uploadFile={uploadFile}
-                  uploadFolder={uploadFolder}
-                  importFromIpfs={props.importFromIpfs}
-                  importFromHttps={props.importFromHttps}
-                  handleGitInit={handleGitInit}
-                />
-              </div>
-            </span>
+
           </div>
         </div>
         <FlatTree

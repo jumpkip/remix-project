@@ -3,13 +3,6 @@ import { getValidLanguage, Compiler } from '@remix-project/remix-solidity'
 import { EventEmitter } from 'events'
 import { configFileContent } from '../compilerConfiguration'
 
-declare global {
-  interface Window {
-    _paq: any
-  }
-}
-const _paq = window._paq = window._paq || []  //eslint-disable-line
-
 export class CompileTabLogic {
   public compiler
   public api: ICompilerApi
@@ -28,7 +21,7 @@ export class CompileTabLogic {
     this.contentImport = contentImport
     this.event = new EventEmitter()
     this.compiler = new Compiler((url, cb) => api.resolveContentAndSave(url).then((result) => cb(null, result)).catch((error) => cb(error.message)))
-    this.evmVersions = ['default', 'prague', 'cancun', 'shanghai', 'paris', 'london', 'berlin', 'istanbul', 'petersburg', 'constantinople', 'byzantium', 'spuriousDragon', 'tangerineWhistle', 'homestead']
+    this.evmVersions = ['default', 'osaka', 'prague', 'cancun', 'shanghai', 'paris', 'london', 'berlin', 'istanbul', 'petersburg', 'constantinople', 'byzantium', 'spuriousDragon', 'tangerineWhistle', 'homestead']
   }
 
   init () {
@@ -117,7 +110,28 @@ export class CompileTabLogic {
         const config = JSON.parse(configContent)
 
         if (config['solidity-compiler']) {
-          this.compiler.set('configFileContent', config['solidity-compiler'])
+          if (typeof config['solidity-compiler'] === 'string') {
+            if (config['solidity-compiler'].endsWith('.json')) {
+              const configFilePath = config['solidity-compiler']
+              const fileExists = await this.api.fileExists(configFilePath)
+
+              if (fileExists) {
+                try {
+                  const fileContent = await this.api.readFile(configFilePath)
+                  config['solidity-compiler'] = JSON.parse(fileContent)
+                  this.compiler.set('configFileContent', config['solidity-compiler'])
+                } catch (e) {
+                  throw new Error('Configuration file specified in remix.config.json contains invalid configuration')
+                }
+              } else {
+                throw new Error('Configuration file specified in remix.config.json does not exist')
+              }
+            } else {
+              throw new Error('Configuration file specified in remix.config.json is not a valid JSON file')
+            }
+          } else {
+            this.compiler.set('configFileContent', config['solidity-compiler'])
+          }
         } else {
           this.compiler.set('configFileContent', JSON.parse(configFileContent))
           this.api.writeFile(remixConfigPath, JSON.stringify({ ...config, 'solidity-compiler': JSON.parse(configFileContent) }, null, 2))
@@ -183,7 +197,9 @@ export class CompileTabLogic {
             `
             const configFilePath = 'remix-compiler.config.js'
             this.api.writeFile(configFilePath, fileContent)
-            _paq.push(['trackEvent', 'compiler', 'runCompile', 'compileWithHardhat'])
+            if (window._matomoManagerInstance) {
+              window._matomoManagerInstance.trackEvent('compiler', 'runCompile', 'compileWithHardhat')
+            }
             this.api.compileWithHardhat(configFilePath).then((result) => {
               this.api.logToTerminal({ type: 'log', value: result })
             }).catch((error) => {
@@ -209,7 +225,9 @@ export class CompileTabLogic {
             }`
             const configFilePath = 'remix-compiler.config.js'
             this.api.writeFile(configFilePath, fileContent)
-            _paq.push(['trackEvent', 'compiler', 'runCompile', 'compileWithTruffle'])
+            if (window._matomoManagerInstance) {
+              window._matomoManagerInstance.trackEvent('compiler', 'runCompile', 'compileWithTruffle')
+            }
             this.api.compileWithTruffle(configFilePath).then((result) => {
               this.api.logToTerminal({ type: 'log', value: result })
             }).catch((error) => {
